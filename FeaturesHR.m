@@ -1,4 +1,4 @@
-function FeatHR = FeaturesHR(hr, fs, N)
+function FeatHR = FeaturesHR(hr, fs, N, meanrr)
     
     %Number of samples in LF,MF and HF
     D=fs/N;
@@ -29,25 +29,14 @@ function FeatHR = FeaturesHR(hr, fs, N)
     frec23=(sum(energ((samples02+1:samples03),:)))/N; %energy between 0.2-0.3Hz
     frec34=(sum(energ((samples03+1:samples04),:)))/N; %energy between 0.3-0.4Hz
     
-    FeatHR=[];    
-    FeatHR=[FeatHR;mean(hr)];
-    FeatHR=[FeatHR;std(hr)];
-    FeatHR=[FeatHR;ratioL];
-    FeatHR=[FeatHR;ratioM];
-    FeatHR=[FeatHR;vlf];
-    FeatHR=[FeatHR;lf];
-    FeatHR=[FeatHR;mf];
-    FeatHR=[FeatHR;hf];
-    FeatHR=[FeatHR;log(vlf)];
-    FeatHR=[FeatHR;log(lf)];       
-    FeatHR=[FeatHR;log(mf)];        
-    FeatHR=[FeatHR;log(hf)];        
-    FeatHR=[FeatHR;log(lf+mf+hf)];  
-    FeatHR=[FeatHR;log(hf./(lf+mf+hf))];    
-    FeatHR=[FeatHR;log(lf./hf)];  
-    FeatHR=[FeatHR;hf./(hf+lf)];
-    FeatHR=[FeatHR;RSA];
-    FeatHR=[FeatHR;frec01];
-    FeatHR=[FeatHR;frec12];
-    FeatHR=[FeatHR;frec23];
-    FeatHR=[FeatHR;frec34];
+    % Create table with features
+    FeatHR=table(mean(hr)', std(hr)', ratioL', ratioM', vlf', lf', mf', hf', log(vlf)', log(lf)', log(mf)', log(hf)', ...
+        log(lf+mf+hf)', log(hf./(lf+mf+hf))', log(lf./hf)', (hf./(hf+lf))', RSA', frec01', frec12', frec23', frec34', ...
+        (sqrt(lf)./meanrr)', (sqrt(hf)./meanrr)', min(hr)',max(hr)',median(hr)',prctile(hr,25)', prctile(hr,75)', ...
+        geomean(abs(hr))',harmmean(hr)', mode(hr)', range(hr)', iqr(hr)',diag(cov(hr)),mad(hr)',std(hr,1)',var(hr,1)', skewness(hr)', ...
+        kurtosis(hr)');
+    FeatHR.Properties.VariableNames = {'meanhr', 'stdhr', 'ratioL', 'ratioM', 'vlf', 'lf', 'mf', 'hf', 'logvlf', 'loglf', ...
+        'logmf', 'loghf', 'loglf+mf+hf', 'loghf./lf+mf+hf', 'loglf./hf', 'hf./hf+lf', 'RSA', 'frec01', 'frec12', 'frec23', ...
+        'frec34', 'sqrt(lf)/meanrr', 'sqrt(hf)/meanrr', 'minhr','maxhr', 'medianhr','prctilehr25', 'prctilehr75', ...
+        'geomeanabshr','harmmeanhr', 'modehr', 'rangehr', 'iqrhr','diagcovhr','madhr','stdhr1','varhr1', 'skewnesshr', ...
+        'kurtosishr'};
