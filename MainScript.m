@@ -98,13 +98,59 @@ end
 %%%%% FEATURE EXTRACTION %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%% ECG %%%
+ecg = []; FeatECG=[];
+for m=1:length(drivers)
+    fecg=reshape(ECG{drivers(m)}(:,inip(m):endp(m)),N*size(ECG{drivers(m)},1),L(m)/N);
+    FeatECG = [FeatECG; FeaturesECG(fecg,size(ECG{drivers(m)},1),fs,N)];
+    ecg=[ecg reshape(mean(ECG{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
+end
+
+
 %%% HR %%%
 hr = [];
 for m=1:length(drivers)
     hr=[hr reshape(mean(HR{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
 end
+FeatHR = FeaturesHR(hr,fs,N, FeatECG.meanrr');
 
-FeatHR = FeaturesHR(hr,fs,N);
+
+%%% Hand %%%
+FeatHAND=[]; hand=[];
+for m=1:length(drivers)
+    fhand=reshape(HAND{drivers(m)}(:,inip(m):endp(m)),N*size(HAND{drivers(m)},1),L(m)/N);
+    FeatHAND = [FeatHAND; FeaturesGSR(fhand,size(HAND{drivers(m)},1),fs,N,'hand')];
+    hand=[hand reshape(mean(HAND{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
+end
+FeatHAND = [FeatHAND FeaturesGSR(hand,size(HAND{drivers(m)},1), fs,N, 'handstats')];
+
+%%% Foot %%%
+FeatFOOT=[]; foot=[];
+for m=1:length(drivers)
+    ffoot=reshape(FOOT{drivers(m)}(:,inip(m):endp(m)),N*size(FOOT{drivers(m)},1),L(m)/N);
+    FeatFOOT = [FeatFOOT; FeaturesGSR(ffoot,size(FOOT{drivers(m)},1),fs,N,'foot')];
+    foot=[foot reshape(mean(FOOT{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
+end
+FeatFOOT = [FeatFOOT FeaturesGSR(foot,size(FOOT{drivers(m)},1), fs,N, 'footstats')];
+
+
+%%% EMG %%%
+emg = []; FeatEMG=[];
+for m=1:length(drivers)
+    femg=reshape(EMG{drivers(m)}(:,inip(m):endp(m)),N*size(EMG{drivers(m)},1),L(m)/N);
+    FeatEMG = [FeatEMG; FeaturesEMG(femg, 'emgfeat')];
+    emg=[emg reshape(mean(EMG{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
+end
+FeatEMG = [FeatEMG FeaturesEMG(emg, 'emgstats')];
+
+%%% RESPIRATION %%%
+resp = []; FeatRESP=[];
+for m=1:length(drivers)
+    fresp=reshape(RESP{drivers(m)}(:,inip(m):endp(m)),N*size(RESP{drivers(m)},1),L(m)/N);
+    FeatRESP = [FeatRESP; FeaturesRESP(fresp, size(RESP{drivers(m)},1), fs, N, 'respfeat')];
+    resp=[resp reshape(mean(RESP{drivers(m)}(:,inip(m):endp(m)),1),N,L(m)/N)];
+end
+FeatRESP = [FeatRESP FeaturesRESP(resp, size(RESP{drivers(m)},1), fs, N, 'respstats')];
 
 
 
