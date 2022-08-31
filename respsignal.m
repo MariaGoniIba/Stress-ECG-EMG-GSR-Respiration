@@ -18,14 +18,6 @@ while ind<length(s)-L
         ind=b+ind-1;
     else
         P(n)=ind;
-        if(representa)
-            if(searchm==1) 
-                plot(P(n)/fs,s(P(n)),'ro')
-            else
-                plot(P(n)/fs,s(P(n)),'go')
-            end
-        end
-        
         searchm=-searchm;
         val=searchm*s(P(n));
         n=n+1;
