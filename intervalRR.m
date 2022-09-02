@@ -84,4 +84,3 @@ function [rr,S1,S2,hurst]=intervalRR(ecg,FS)
     %hold off
     
     hurst=q(1);
-

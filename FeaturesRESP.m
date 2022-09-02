@@ -23,6 +23,9 @@ function FeatRESP = FeaturesRESP(fresp, sizeresp, fs,N, modality)
                 ratio_resp1=Vt./Ti; %mean inhaling flux
                 ratio_resp1_sum(k)=sum(ratio_resp1);
                 Ttot=Ti(1:length(Ti)-1)+Te;
+                if isempty(Ttot)
+                    Ttot=0;
+                end
                 Ttot_sum(k)=sum(Ttot);
                 Ttot_mean(k)=mean(Ttot);
                 Ttot_std(k)=std(Ttot);  
@@ -66,22 +69,50 @@ function FeatRESP = FeaturesRESP(fresp, sizeresp, fs,N, modality)
                 P=P/sum(P);
                 ApEnTtot(k)=sum(-P.*log2(P));
                 Vt_ar1=lpc(Vt,1);   %AR model 1st order
-                Vt_ar(k)=(Vt_ar1(:,2))';   
+                if length(Vt_ar1)<2
+                    Vt_ar(k)=0;
+                else
+                    Vt_ar(k)=(Vt_ar1(:,2))';   
+                end
                 Ti_ar1=lpc(Ti,1);
-                Ti_ar(k)=(Ti_ar1(:,2))';   
+                if length(Ti_ar1)<2
+                    Ti_ar(k)=0;
+                else
+                    Ti_ar(k)=(Ti_ar1(:,2))';   
+                end
                 Te_ar1=lpc(Te,1);
-                Te_ar(k)=(Te_ar1(:,2))';   
+                if length(Te_ar1)<2
+                    Te_ar(k)=0;
+                else
+                    Te_ar(k)=(Te_ar1(:,2))';   
+                end
                 Ttot_ar1=lpc(Ttot,1);
-                Ttot_ar(k)=(Ttot_ar1(:,2))';
-                ratio_resp2_ar1=lpc(ratio_resp2,1);
-                ratio_resp2_ar(k)=(ratio_resp2_ar1(:,2))';    %para ratio_resp2
+                if length(Ttot_ar1)<2
+                    Ttot_ar(k)=0;
+                else
+                    Ttot_ar(k)=(Ttot_ar1(:,2))';
+                end
+                if isempty(ratio_resp2)
+                    ratio_resp2_ar(k)=0;
+                else
+                    ratio_resp2_ar1=lpc(ratio_resp2,1);
+                    if length(ratio_resp2_ar1)<2
+                        ratio_resp2_ar(k)=0;
+                    else
+                        ratio_resp2_ar(k)=(ratio_resp2_ar1(:,2))';    %for ratio_resp2
+                    end
+                end
                 ratio_resp1_ar1=lpc(ratio_resp1,1);
-                ratio_resp1_ar(k)=(ratio_resp1_ar1(:,2))';    %para ratio_resp1
+                if length(ratio_resp1_ar1)<2
+                    ratio_resp1_ar(k)=0;
+                else
+                    ratio_resp1_ar(k)=(ratio_resp1_ar1(:,2))';    %for ratio_resp1
+                end
                 ratio_resp3_ar1=lpc(ratio_resp3,1);
                 if length(ratio_resp3_ar1)<2
                     ratio_resp3_ar(k)=0;
                 else
-                    ratio_resp3_ar(k)=(ratio_resp3_ar1(:,2))';    %para ratio_resp3
+                    ratio_resp3_ar(k)=(ratio_resp3_ar1(:,2))';    %for ratio_resp3
                 end
             end
             
@@ -130,7 +161,7 @@ function FeatRESP = FeaturesRESP(fresp, sizeresp, fs,N, modality)
             [Nr(k),Ni(k),E(k)]=recurrence_analysis(fresp(:,k));
         end
         
-        %Welch periodogram to find maximum peaks and frequencies. To check if it detects correctly the maximum,
+        % Welch periodogram to find maximum peaks and frequencies. To check if it detects correctly the maximum,
         % do a semilogy(y)
         potmax=zeros(1,size(fresp,2));
         pospotmax=zeros(1,size(fresp,2));
@@ -147,32 +178,32 @@ function FeatRESP = FeaturesRESP(fresp, sizeresp, fs,N, modality)
         DDRESP=diff(DRESP);
         DDDRESP=diff(DDRESP);
 
-        %Autoregressive model 1st order
+        % Autoregressive model 1st order
         lpc_resp=lpc(fresp,1);
         lpc_resp=(lpc_resp(:,2))';
-        %Sample entropy of respiration
+        % Sample entropy of respiration
         P=hist(fresp,1000);
         P=P./(ones(1000,1)*sum(P));
         ApEnResp=sum(-P.*log2(P+eps));
-        %Sample entropy of first derivative of resp
+        % Sample entropy of first derivative of resp
         P=hist(DRESP,1000);
         P=P./(ones(1000,1)*sum(P));
         ApEnDResp=sum(-P.*log2(P+eps));
-        %Sample entropy of second derivative of resp
+        % Sample entropy of second derivative of resp
         P=hist(DDRESP,1000);
         P=P./(ones(1000,1)*sum(P));
         ApEnDDResp=sum(-P.*log2(P+eps));
-        %Sample entropy of third derivative of resp
+        % Sample entropy of third derivative of resp
         P=hist(DDDRESP,1000);
         P=P./(ones(1000,1)*sum(P));
         ApEnDDDResp=sum(-P.*log2(P+eps));
 
-        FeatRESP=table(mean(fresp)', std(fresp)', VTE', MARIAFEAT', DRESP', DDRESP', DDDRESP', min(fresp)', max(fresp)', ...
+        FeatRESP=table(mean(fresp)', std(fresp)', VTE', MARIAFEAT', mean(DRESP)', mean(DDRESP)', mean(DDDRESP)', min(fresp)', max(fresp)', ...
             median(fresp)', prctile(fresp,25)', prctile(fresp,75)', geomean(abs(fresp))', harmmean(fresp)', mode(fresp)', range(fresp)', ...
             iqr(fresp)', diag(cov(fresp)), mad(fresp)', std(fresp,1)', var(fresp,1)', skewness(fresp)', kurtosis(fresp)', vlf_resp', ...
             lf_resp', mf_resp', hf_resp', frec01_resp', frec12_resp', frec23_resp', frec34_resp', ratioL_resp',lpc_resp', ApEnResp', ...
             ApEnDResp', ApEnDDResp', ApEnDDDResp', potmax', pospotmax', Nr', Ni', E');
-        FeatRESP.Properties.VariableNames = {'mean_resp','std_resp','VTE','MARIAFEAT','DRESP','DDRESP','DDDRESP','min_resp', ...
+        FeatRESP.Properties.VariableNames = {'mean_resp','std_resp','VTE','MARIAFEAT','meanDRESP','meanDDRESP','meanDDDRESP','min_resp', ...
             'max_resp','median_resp','prctile25_resp','prctile75_resp','geomean_resp','harmmean_resp','mode_resp','range_resp', ...
             'iqr_resp','diag_resp','mad_resp','std1_resp','var1_resp','skewness_resp','kurtosis_resp', 'vlf_resp', 'lf_resp', ...
             'mf_resp','hf_resp','frec01_resp','frec12_resp','frec23_resp','frec34_resp','ratioL_resp', 'lpc_resp', 'ApEnResp', ...

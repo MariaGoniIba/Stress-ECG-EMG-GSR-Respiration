@@ -16,7 +16,8 @@ function FeatGSR = FeaturesGSR(s, sizegsr, fs,N, modality)
         end
     
         FeatGSR=table(Num_resp', frec_oc', Sm_sum', Sd_sum', Sa_sum', tm_sum', Sclmad', Sclstd');
-        FeatGSR.Properties.VariableNames = {'Num_resp', 'frec_oc', 'Sm_sum', 'Sd_sum', 'Sa_sum', 'tm_sum', 'Sclmad', 'Sclstd'};
+        FeatGSR.Properties.VariableNames = {'Num_resp_hand', 'frec_oc_hand', 'Sm_sum_hand', 'Sd_sum_hand', 'Sa_sum_hand', 'tm_sum_hand', ...
+            'Sclmad_hand', 'Sclstd_hand'};
     
     elseif strcmp(modality, 'handstats')
         FeatGSR=table(mean(s)', mad(s)', std(s)', min(s)', max(s)', median(s)', prctile(s,25)', ...
@@ -43,7 +44,8 @@ function FeatGSR = FeaturesGSR(s, sizegsr, fs,N, modality)
         end
     
         FeatGSR=table(Num_resp', frec_oc', Sm_sum', Sd_sum', Sa_sum', tm_sum', Sclmad', Sclstd');
-        FeatGSR.Properties.VariableNames = {'Num_resp', 'frec_oc', 'Sm_sum', 'Sd_sum', 'Sa_sum', 'tm_sum', 'Sclmad', 'Sclstd'};
+        FeatGSR.Properties.VariableNames = {'Num_resp_foot', 'frec_oc_foot', 'Sm_sum_foot', 'Sd_sum_foot', 'Sa_sum_foot', 'tm_sum_foot', ...
+            'Sclmad_foot', 'Sclstd_foot'};
 
     elseif strcmp(modality, 'footstats')
         FeatGSR=table(mean(s)', mad(s)', std(s)', min(s)', max(s)', median(s)', prctile(s,25)', ...

@@ -17,7 +17,10 @@ while ind<length(s)-L
         val=a;
         ind=b+ind-1;
     else
-        P(n)=ind;
+        P(n)=ind;      
+        if length(P)>1 && P(n)==P(n-1)
+            break
+        end
         searchm=-searchm;
         val=searchm*s(P(n));
         n=n+1;
@@ -27,14 +30,18 @@ end
 INSP=P(1:2:end);
 EXP=P(2:2:end);
 
-num_resp=length(EXP);
-
-%Calculate inhaling and exhaling times and volume
-for ind=1:length(EXP)
-    Vt(ind)=s(EXP(ind))-s(INSP(ind));
-    Ti(ind)=EXP(ind)-INSP(ind);
-    if ind<length(EXP)
-        Te(ind)=INSP(ind+1)-EXP(ind);
+if (length(INSP)+length(EXP)==2) && INSP==1 && EXP==1
+    [num_resp, Vt, Ti, Te]=deal(0);
+else
+    num_resp=length(EXP);
+    
+    %Calculate inhaling and exhaling times and volume
+    for ind=1:length(EXP)
+        Vt(ind)=s(EXP(ind))-s(INSP(ind));
+        Ti(ind)=EXP(ind)-INSP(ind);
+        if ind<length(EXP)
+            Te(ind)=INSP(ind+1)-EXP(ind);
+        end
     end
 end
 
@@ -42,6 +49,3 @@ end
 % hold on
 % plot(INSP,s(INSP),'ro');
 % plot(EXP,s(EXP),'rx');
-
-
-

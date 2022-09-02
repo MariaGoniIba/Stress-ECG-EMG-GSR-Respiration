@@ -5,21 +5,21 @@ function FeatEMG = FeaturesEMG(femg, modality)
         for k=1:size(femg,2)
             s = femg(:,k);
     
-            %Hallo los cruces por cero
+            % Zero crossing
             zc(k)=sum((s(2:end)>0)~=(s(1:end-1)>0));
             
-            %Hallo los cambios de pendiente
+            % Change of slope
             s_pend=diff(s);
             ssc(k)=sum((s_pend(2:end)>0)~=(s_pend(1:end-1)>0));
     
-            %Hallo la entropia aproximada
+            % Approximate entropy
             P=hist(femg(:,k),100);
             P=P(find(P));
             P=P/sum(P);
             ApEn(k)=sum(-P.*log2(P));
-            %Hallo el periodograma
+            % Periodogram
             periodog(k)=sum(abs(fft(femg(:,k))).^2);
-            %Hallo los coeficientes del modelo AR
+            % AR model coefficients
             coeff=lpc(femg(:,k),5);
             coeff1(k)=coeff(2); 
             coeff2(k)=coeff(3); 

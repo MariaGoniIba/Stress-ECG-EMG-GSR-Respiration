@@ -64,7 +64,7 @@ fs=15.5;  % Minimum common sample frequency among signals
 N=fs*60; % samples in 1 minute
 
 inip = []; endp = []; %initial and end points
-L = [];
+L = []; stress = []; exp = [];
 for m = 1:length(drivers)
     marker=MARKER{drivers(m)};
     
@@ -92,6 +92,10 @@ for m = 1:length(drivers)
     temp=ind(8); % end point
     L(m)=floor((temp-inip(m))/N)*N;
     endp(m)=inip(m)+L(m)-1;
+
+    % Stress classes
+    stress=[stress reshape(ind2(1,inip(m):endp(m)),N,L(m)/N)];
+    exp=[exp m*ones(1,L(m)/N)];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,6 +128,7 @@ for m=1:length(drivers)
 end
 FeatHAND = [FeatHAND FeaturesGSR(hand,size(HAND{drivers(m)},1), fs,N, 'handstats')];
 
+
 %%% Foot %%%
 FeatFOOT=[]; foot=[];
 for m=1:length(drivers)
@@ -143,6 +148,7 @@ for m=1:length(drivers)
 end
 FeatEMG = [FeatEMG FeaturesEMG(emg, 'emgstats')];
 
+
 %%% RESPIRATION %%%
 resp = []; FeatRESP=[];
 for m=1:length(drivers)
@@ -153,6 +159,42 @@ end
 FeatRESP = [FeatRESP FeaturesRESP(resp, size(RESP{drivers(m)},1), fs, N, 'respstats')];
 
 
+%%%%%%%%%%%%%%%%%%%%
+%%%%% CLEANING %%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+% All features
+data=[FeatECG, FeatHR, FeatHAND, FeatFOOT, FeatEMG, FeatRESP];
+
+ind_nan=[]; n_nan=[];
+for i=1:size(data,2)
+    count=sum(isnan(table2array(data(:,i))));
+    if count > 0
+        ind_nan=[ind_nan i];
+        n_nan=[n_nan count];
+    end
+end
+% There are 20 features with nan values. One features has 605 nan values so
+% we discarded. The other ones have 2 or 4 nan values, so we impute their values.
+for i=1:length(ind_nan)
+    f=table2array(data(:,ind_nan(i)));
+    fimpute=median(f(~isnan(f))); %value to impute
+    f(isnan(f))=fimpute;
+    data(:,ind_nan(i))=array2table(f);
+    clear f
+end
+data(:,ind_nan(1))=[]; %discard feature with 605 nan values
+
+% Classes
+stress = mean(stress);
+% Round decimals to -1, 0 and 1
+stress(stress>0.5)=1;
+stress((-0.5<=stress)&(stress<=0.5))=0;
+stress(stress<-0.5)=-1;
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% CLASSIFICATION %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+[Accuracy, featselected] = Classification(data, stress, exp, length(drivers));
