@@ -198,3 +198,19 @@ stress(stress<-0.5)=-1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [Accuracy, featselected] = Classification(data, stress, exp, length(drivers));
+
+clc
+disp ('***** RESULTS *****')
+disp(['Accuracy: ', num2str(Accuracy*100), '%'])
+fprintf('\n')
+
+% Features most selected
+%bar(sum(featselected'))
+count=sum(featselected');
+ind = find(count > (length(drivers)/2));
+count = count(ind);
+
+display('Features most selected:')
+for i = 1:length(ind)
+    disp([data.Properties.VariableNames(ind(i)), num2str(count(i)), 'times'])
+end

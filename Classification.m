@@ -33,3 +33,5 @@ end
 [a,b]=max(Y);
 [c,d]=max(Classes);
 Acc=mean(b==d);   % Accuracy
+
+x = x(2:end,:);
