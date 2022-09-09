@@ -197,17 +197,26 @@ stress(stress<-0.5)=-1;
 %%%%% CLASSIFICATION %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[Accuracy, featselected] = Classification(data, stress, exp, length(drivers));
+nrep = 20;
 
+Accuracy = []; featselected = {};
+for i=1:nrep
+    [Accuracy(i), featselected{i}] = Classification(data, stress, exp, length(drivers));
+end
 clc
 disp ('***** RESULTS *****')
-disp(['Accuracy: ', num2str(Accuracy*100), '%'])
+disp(['Accuracy: ', num2str(mean(Accuracy)*100), '%'])
 fprintf('\n')
 
 % Features most selected
-%bar(sum(featselected'))
-count=sum(featselected');
-ind = find(count > (length(drivers)/2));
+F=[];
+for i=1:nrep
+F = [F featselected{i}];
+end
+count = sum(F');
+%bar(count)
+
+ind = find(count > (length(drivers)/2)*nrep);
 count = count(ind);
 
 display('Features most selected:')
